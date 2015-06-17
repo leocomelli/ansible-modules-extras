@@ -19,9 +19,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
-import json
-import base64
-
 DOCUMENTATION = '''
 ---
 module: gh_keys
@@ -29,42 +26,59 @@ version_added: 1.9
 short_description: Manages github ssh keys.
 description:
     - The module manages the ssh key for a specific user through Github API v3.
+
 options:
   action:
     description: This tells the gh_keys module what you want it to do.
-    required: true
-    choices: [ list_keys, get_key, add_key, remove_key ]
+    choices: [ present, absent ]
+
   user:
     description: Github username.
     required: true
+
   password:
     description: Github password. If 2FA is enabled for your account, you should generate a new personal access token. Required for get_key, add_key and remove_key 
     required: false 
+
   title:
     description: Title of the new ssh key. Required for add_key
     required: false
+
   key:
     description: The path of file that contains the public key. Required for add_key
     required: false
+
   key_id:
     description: The key id provided by Github. Required for get_key and remove_key
     required: false
+
 author: Leonardo Comelli
 '''
 
 EXAMPLES = '''
 # Example from Ansible Playbooks
+
 # Lists limit informations about all keys of non-authenticated user
-- gh_keys: action=list_keys user=leocomelli
+- gh_keys: user=leocomelli
+
 # Lists all informations about all keys of authenticated user
-- gh_keys: action=list_keys user=leocomelli password=secret
+- gh_keys: user=leocomelli password=secret
+
 # Gets a single public key (authetication required)
-- gh_keys: action=get_key user=leocomelli password=secret key_id=8767854
+- gh_keys: user=leocomelli password=secret key_id=8767854
+
 # Adds a new public key (authentication required)
-- gh_keys: action=add_key user=leocomelli password=secret title=my_new_key key=/home/leocomelli/.ssh/id_rsa.pub
-# Removes an existing ssh key
-- gh_keys: action=remove_key user=leocomelli password=secret key_id=8767854
+- gh_keys: action=present user=leocomelli password=secret title=my_new_key key=/home/leocomelli/.ssh/id_rsa.pub
+
+# Removes an existing ssh key (authentication required)
+- gh_keys: action=absent user=leocomelli password=secret key_id=8767854
 '''
+
+import base64
+try:
+  import json
+except ImportError:
+  import simplejson as json
 
 GH_API_URL = "https://api.github.com/%s"
 
@@ -80,11 +94,12 @@ class GHKeys(object):
     self.key_id = module.params['key_id']
   
   def perform_by_action(self):
+    print self.action
     return {
       'list_keys'  : self.list_keys,
       'get_key'    : self.get_key,
-      'add_key'    : self.add_key,
-      'remove_key' : self.remove_key
+      'present'    : self.add_key,
+      'absent' : self.remove_key
     }[self.action]()
 
   def list_keys(self):
@@ -158,11 +173,17 @@ def main():
       key      = dict(),
       key_id   = dict(),
       user     = dict(required=True),
-      action   = dict(required=True, choices=['list_keys', 'get_key', 'add_key', 'remove_key']),
+      action   = dict(choices=['present', 'absent']),
     )
   )  
 
   gh_keys = GHKeys(module)
+  if gh_keys.action is None:
+    if gh_keys.key_id is not None:
+      gh_keys.action = "get_key"
+    else:
+      gh_keys.action = "list_keys"
+
   try:
     response = gh_keys.perform_by_action()
     module.exit_json(changed=True, result=response)
