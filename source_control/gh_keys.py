@@ -22,7 +22,7 @@
 DOCUMENTATION = '''
 ---
 module: gh_keys
-version_added: 1.9 
+version_added: 2.0 
 short_description: Manages github ssh keys.
 description:
     - The module manages the ssh key for a specific user through Github API v3.
@@ -38,21 +38,25 @@ options:
 
   password:
     description: Github password. If 2FA is enabled for your account, you should generate a new personal access token. Required for get_key, add_key and remove_key 
-    required: false 
+    required: false
+    default: none
 
   title:
     description: Title of the new ssh key. Required for add_key
     required: false
+    default: none
 
   key:
     description: The path of file that contains the public key. Required for add_key
     required: false
+    default: none
 
   key_id:
     description: The key id provided by Github. Required for get_key and remove_key
     required: false
+    default: none
 
-author: Leonardo Comelli
+author: Leonardo Comelli (@leocomelli)
 '''
 
 EXAMPLES = '''
