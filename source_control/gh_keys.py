@@ -78,6 +78,21 @@ EXAMPLES = '''
 - gh_keys: action=absent user=leocomelli password=secret key_id=8767854
 '''
 
+RETURN = '''
+output:
+  description: the data returned by Github according to the action performed
+  returned: success
+  type: dict
+  sample: 
+    {
+      "id":9999999991,
+      "key":"ssh-rsa AAA2...",
+      "url":"https://api.github.com/user/keys/9999999991",
+      "title":"my-new-pkey",
+      "verified":true
+    }
+'''
+
 import base64
 try:
   import json
