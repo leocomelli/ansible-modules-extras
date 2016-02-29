@@ -22,7 +22,7 @@
 DOCUMENTATION = '''
 ---
 module: gh_keys
-version_added: 2.0 
+version_added: 2.1 
 short_description: Manages github ssh keys.
 description:
     - The module manages the ssh key for a specific user through Github API v3.
