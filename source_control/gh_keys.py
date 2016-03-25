@@ -159,7 +159,11 @@ def check_required_fields(module):
   present_fields = ['title', 'key', 'password']
   absent_fields = ['key_id', 'password']
 
-  fields = present_fields if module.params['state'] == 'present' else absent_fields
+  if module.params['state'] == 'present':
+    fields = present_fields
+  else:
+    fields = absent_fields
+
   for field in fields:
     if module.params[field] is None:
       raise ValueError(field + " cannot be null for state [" + module.params['state'] + "]")
