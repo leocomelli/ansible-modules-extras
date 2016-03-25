@@ -150,8 +150,10 @@ class GHKeys(object):
     if info['status'] == 200:
       return response.read()
     else:
-      raise RuntimeError('%s%s' % (info['msg'], \
-                                   " - key is already in use" if info['status'] == 422 else ""))
+      msg = info['msg']
+      if info['status'] == 422:
+        msg += " - key is already in use"
+      raise RuntimeError(msg)
 
 def check_required_fields(module):
   present_fields = ['title', 'key', 'password']
